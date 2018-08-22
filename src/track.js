@@ -7,23 +7,20 @@ export default class Track extends ObjectContainer {
     super();
     this.top = top;
     this.duration = 0;
+    this.state = 'idle'; // idle, busy
 
   }
 
   addChild(child) {
-    if (this.children.length > 0) {
-      const lastChild = this.children[this.children.length - 1];
-      child.delay = lastChild.delay + lastChild.length / lastChild.speed;
+    if (this.state === 'idle') {
+      child.top = this.top;
+      super.addChild(child);
     }
-    child.top = this.top;
-    super.addChild(child);
   }
 
   update() {
     this.children.forEach(child => {
       if (child.state === 'move') {
-        this.duration = this.duration + child.speed;
-        console.log('duration', this.duration);
         child.update();
 
       } else {
@@ -31,6 +28,14 @@ export default class Track extends ObjectContainer {
         return;
       }
     });
+
+    const lastChild = this.children[this.children.length - 1];
+
+    if (lastChild.left < lastChild.width) {
+      this.state = 'busy';
+    } else {
+      this.state = 'idle';
+    }
   }
 
 }

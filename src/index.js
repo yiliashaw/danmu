@@ -18,13 +18,17 @@ const vm = new Vue({
         '这是一个字数递增的',
         '这是一个字数递增的句子',
       ],
+      queue: [],
       list: [],
       tracks: [null, null, null],
+
     }
   },
   methods: {
     addMessage() {
-      const { length } = this.randomDanmu;
+      const {
+        length
+      } = this.randomDanmu;
       const message = this.randomDanmu[Math.floor(Math.random() * length + 0)];
       console.log('push-->', message);
     },
@@ -46,6 +50,24 @@ const vm = new Vue({
       const item = Math.min.apply(this, lengthMap);
       return lengthMap.indexOf(item);
     },
+
+    sendMessage(text) {
+      const message = new Message({
+        content: text
+      });
+      if (this.track.state === 'busy') {
+        return;
+      } else {
+        this.queue.shift();
+        this.track.addChild(message);
+        const update = () => {
+          this.track.update();
+          setTimeout(update, 16);
+        };
+      }
+      setTimeout(update, 16);
+
+    }
   },
 
   mounted() {
