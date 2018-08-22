@@ -1,55 +1,56 @@
 import DisplayObject from './displayObject';
 
-export default class Message extends DisplayObject {
+const INIT = 0;
+const START = 1;
+const ANIMATE = 2
+const END = 3;
+
+
+export default class Message {
   constructor({
-    el,
-    content,
-    top,
-    speed = 1,
-    fontSize = 16
+    id = 0,
+    content = 0,
+    fontSize = 16, // px
+    duration = 5 * 1000, // 5s
+    windowWidth = 750,
   }) {
-    super();
-    this.el = el;
+    this.id = id;
     this.content = content;
-    this.top = top;
-    this.speed = speed;
     this.fontSize = fontSize;
-    this.left = 100;
-    this.state = 'init';
+    this.duration = duration;
+    this.windowWidth = windowWidth;
+    this.startTime =  null;
+    this.endTime = null;
+    this.speed = 0;
     this.width = 0;
-    this.delay = 0;
+    this.left = 100;
+    this.state = INIT;
+    this.parent = null;
     this.init();
-  }
-
-  update() {
-    if (this.left <= -this.width) {
-      console.log('可以消失了');
-      this.changeState('destroy');
-
-    } else {
-      this.left = this.left - this.speed;
-    }
-  }
-
-  changeState(state) {
-    switch (state) {
-      case 'move':
-        this.state = 'move';
-        break;
-      case 'stop':
-        this.state = 'stop';
-        break;
-      case 'destroy':
-        this.state = 'destroy';
-        this.parent.removeChild(this);
-        break;
-    }
   }
 
   init() {
     this.width = this.content.length * this.fontSize;
-    this.changeState('move');
+    this.speed = this.windowWidth / this.duration;  // px/s
+    // this.state = START;
   }
 
+  start() {
+    this.state = START;
+    this.startTime = Date.now();
+    this.endTime = this.startTime + this.duration;
+    console.log(this.id, this.startTime, this.endTime);
+  }
 
+  isExpired() {
+    return this.state === START && 
+      Date.now() > this.endTime;
+  }
+
+  offsetFromX() {
+    const now = Date.now();
+    const passed = now - this.startTime;
+    const moved = passed * this.speed;
+    return moved - this.width;
+  }
 }

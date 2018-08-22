@@ -1,147 +1,94 @@
 <template>
   <div id="app">
-    <button class="add" @click="addMessage">{{message}}</button>
+    <button class="add" @click="addMessageMultiple(6)">{{message}}</button>
       <div class="wrap">
-          <div class="track" >
-              <div  v-if="track && track.children" class="text"v-for="(message, index) in track.children" :style="{
-                left: message.left + '%',
-                animationDelay: message.delay / 10 + 's',
-              }"> {{message.content}}
-              </div>
+          <div class="track" v-for="item in danmuData" :key="item.id">
+            <Message
+              v-for="message in item.children" 
+              :key="message.id"
+              :duration="message.duration"
+              :content="message.id + ':' + message.content"
+            ></Message>
           </div>
-          <!-- <div class="track" v-for="(item, index) in tracks">
-              <div class="text" v-for="(message, index) in item.children" :style="{
-                left: message.left + '%',
-                transform: 'translateX(' + message.left + '%)',
-                animationDelay: message.delay / 10 + 's',
-              }"> {{message.content}}
-              </div>
-          </div> -->
       </div>
   </div>
 </template>
 
 <script>
-import Track from './track';
-import Message from './message';
+import Message from './components/Message';
+import Manager from "./manager";
+const manager = new Manager();
+
 export default {
+  components: {
+    Message,
+  },
   data() {
     return {
-      message: '发送弹幕',
+      message: "发送弹幕",
       randomDanmu: [
-        '哦',
-        '你好',
-        '我很好',
-        '所以你呢',
-        '我也非常好',
-        '那我知道了哦',
-        '可是我还不知道',
-        '那你怎么才能知道',
-        '这是一个字数递增的',
-        '这是一个字数递增的句子'
+        "哦",
+        "你好",
+        "我很好",
+        "所以你呢",
+        "我也非常好",
+        "那我知道了哦",
+        "可是我还不知道",
+        "那你怎么才能知道",
+        "这是一个字数递增的",
+        "这是一个字数递增的句子"
       ],
       list: [],
-      tracks: [{}, {}, {}],
-      track: {},
+      danmuData: [],
     };
   },
   methods: {
     addMessage() {
       const { length } = this.randomDanmu;
       const message = this.randomDanmu[Math.floor(Math.random() * length + 0)];
-      console.log('push-->', message);
-
-      this.track.addChild(new Message({content: message}));
-      const update = () => {
-        this.track.update();
-        setTimeout(update, 16);
-      };
-      setTimeout(update, 16);
+      console.log("push-->", message);
+      manager.add({
+        content: message
+      });
     },
-
-    calcTrackLength(track) {
-      if (track.children && track.children.length > 0) {
-        return track.children
-          .map(child => child.length)
-          .reduce((a, c) => a + c);
-      } else {
-        return 0;
+    addMessageMultiple(count) {
+      for(let i=0; i<count; ++i){
+        this.addMessage();
       }
     },
-
-    calcIdleTrack() {
-      const lengthMap = this.tracks.map(track => {
-        const len = this.calcTrackLength(track);
-        return len;
-      });
-      console.log('lengthMap', lengthMap);
-      const item = Math.min.apply(this, lengthMap);
-      return lengthMap.indexOf(item);
-    },
-
-    update() {}
+    updateDanmu() {
+      this.danmuData = manager.getData();
+    }
   },
 
-  created() {
-    // console.log('mounted....');
-    this.track = new Track({
-      top: 80
-    });
+  mounted() {
+    this.updateDanmu();
+    manager.on('update', this.updateDanmu);
 
-    const message = new Message({
-      content: '我爱北京天安门'
-    });
+    let to;
+    const tickInterval = 200;
 
-    const message1 = new Message({
-      content: '天安门上太阳升'
-    });
+    const tick = () => {
+      manager.tick();
 
+      this.to = setTimeout(tick, tickInterval);
+    }
 
+    this.to = setTimeout(tick, tickInterval);
 
-    // this.track.addChild(message);
-    // this.track.addChild(message1);
-
-    // 多track
-    this.list = this.randomDanmu;
-
-    this.tracks.forEach((item, index) => {
-      this.tracks[index] = new Track({
-        top: 80 * (index + 1)
-      });
-    });
-
-    // console.log('tracks-->', this.list);
-
-    this.list.forEach(item => {
-      const message = new Message({
-        content: item
-      });
-
-      this.track.addChild(message);
-
-      // const idleIndex = this.calcIdleTrack();
-      // console.log(idleIndex);
-      // this.tracks.forEach((item, index) => {
-      //   if (idleIndex === index) {
-      //     this.tracks[index].addChild(message);
-      //     const update = () => {
-      //       // stage.update();
-      //       this.tracks[index].update();
-      //       setTimeout(update, 16);
-      //     };
-      //     // setTimeout(update, 16);
-      //   }
-      // });
-    });
-
-    console.log(this.tracks);
+    // this.$on("add", (option) => manager.add(option));
+    // this.tracks = manager.tracks;
   }
 };
 </script>
 
 <style>
+* {
+  margin: 0;
+  padding: 0;
+}
 #app {
-  font-family: 'Avenir', Helvetica, Arial, sans-serif;
+  font-family: "Avenir", Helvetica, Arial, sans-serif;
   -webkit-font-smoothing: antialiased;
   -moz-osx-font-smoothing: grayscale;
   text-align: center;
@@ -154,7 +101,7 @@ export default {
   height: 400px;
   background: darkseagreen;
   position: relative;
-  margin-left: 50px;
+  /* margin-left: 300px; */
 }
 
 .wrap .track {
@@ -163,29 +110,5 @@ export default {
   height: 100px;
   margin-bottom: 20px;
   background-color: cadetblue;
-}
-
-.wrap .track .text {
-  position: absolute;
-  /* width: 100%; */
-  /* padding-left: 50px; */
-  /* background: pink; */
-  text-align: left;
-  top: 50%;
-  left: 100%;
-  white-space: nowrap;
-  /* font-size: 24px; */
-  /* transform: translateX(-200%); */
-  /* animation: moveLeft 8s linear; */
-}
-
-@keyframes moveLeft {
-  0% {
-    transform: translateX(100%);
-  }
-
-  100% {
-    transform: translateX(-200%);
-  }
 }
 </style>

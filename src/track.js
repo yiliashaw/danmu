@@ -1,41 +1,47 @@
-import ObjectContainer from './objectContainer';
 
-export default class Track extends ObjectContainer {
+
+export default class Track {
   constructor({
+    id,
     top
   }) {
-    super();
+    this.id = id;
     this.top = top;
-    this.duration = 0;
-    this.state = 'idle'; // idle, busy
+    this.children = [];
+  }
 
+  canAddChild() {
+    if (this.children && this.children.length <= 0) {
+      return true;
+    }
+    
+    const lastChild = this.children[this.children.length - 1];
+    if (lastChild.offsetFromX() > 20) {
+      return true;
+    }
+    
+    return false;
   }
 
   addChild(child) {
-    if (this.state === 'idle') {
-      child.top = this.top;
-      super.addChild(child);
-    }
+    this.children.push(child);
+    child.top = this.top;
+    child.parent = this;
+    child.start();
   }
 
-  update() {
-    this.children.forEach(child => {
-      if (child.state === 'move') {
-        child.update();
+  removeChild(child) {
+    const index = this.children.indexOf(child);
+    this.children.splice(index, 1);
+    child.parent = null;
+  }
 
-      } else {
-        console.log('meg state -->', child.state);
-        return;
+  garbageCollect() {
+    this.children.forEach(child => {
+      if (child.isExpired()) {
+        console.log(child.id, child.startTime, Date.now());
+        this.removeChild(child);
       }
     });
-
-    const lastChild = this.children[this.children.length - 1];
-
-    if (lastChild.left < lastChild.width) {
-      this.state = 'busy';
-    } else {
-      this.state = 'idle';
-    }
   }
-
 }
