@@ -16,9 +16,7 @@ export default class ObjectContainer {
   }
 
   update() {
-    console.log('track update');
     this.children.forEach(child => child.update());
-
   }
 
 }

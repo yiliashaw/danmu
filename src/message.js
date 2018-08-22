@@ -1,52 +1,54 @@
 import DisplayObject from './displayObject';
 
 export default class Message extends DisplayObject {
-  constructor({ el, content, top, left, speed = 10, fontSize = 24 }) {
+  constructor({
+    el,
+    content,
+    top,
+    speed = 1,
+    fontSize = 16
+  }) {
     super();
     this.el = el;
     this.content = content;
     this.top = top;
-    this.left = left;
     this.speed = speed;
     this.fontSize = fontSize;
-    this.state = 'stop';
-    this.length = 0;
+    this.left = 100;
+    this.state = 'init';
+    this.width = 0;
+    this.delay = 0;
     this.init();
   }
 
   update() {
-    if (this.left < 0 && Math.abs(this.left) > this.length + 10) {
+    if (this.left <= -this.width) {
+      console.log('可以消失了');
+      this.changeState('destroy');
 
     } else {
-      this.left -= this.speed;
+      this.left = this.left - this.speed;
     }
-
   }
 
-  stateManager() {
-    const states = {
-      move() {
+  changeState(state) {
+    switch (state) {
+      case 'move':
         this.state = 'move';
-      },
-      stop() {
+        break;
+      case 'stop':
         this.state = 'stop';
-      },
-      destroy() {
-        this.state = 'destory';
+        break;
+      case 'destroy':
+        this.state = 'destroy';
         this.parent.removeChild(this);
-      }
-    };
-
-    return {
-      changeState(state) {
-        states[state]();
-      }
+        break;
     }
-
   }
 
   init() {
-    this.length = this.content.length * this.fontSize;
+    this.width = this.content.length * this.fontSize;
+    this.changeState('move');
   }
 
 
