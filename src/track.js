@@ -14,12 +14,13 @@ export default class Track {
     if (this.children && this.children.length <= 0) {
       return true;
     }
-    
+
     const lastChild = this.children[this.children.length - 1];
+    // console.log(lastChild.id, Date.now() - lastChild.startTime, lastChild.offsetFromX())
     if (lastChild.offsetFromX() > 20) {
       return true;
     }
-    
+
     return false;
   }
 
@@ -30,18 +31,13 @@ export default class Track {
     child.start();
   }
 
-  removeChild(child) {
-    const index = this.children.indexOf(child);
-    this.children.splice(index, 1);
-    child.parent = null;
-  }
-
   garbageCollect() {
-    this.children.forEach(child => {
+    for (let i = this.children.length - 1; i > -1; --i) {
+      const child = this.children[i];
       if (child.isExpired()) {
-        console.log(child.id, child.startTime, Date.now());
-        this.removeChild(child);
+        this.children.splice(i, 1);
+        child.parent = null;
       }
-    });
+    }
   }
 }

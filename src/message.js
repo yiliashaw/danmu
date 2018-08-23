@@ -39,7 +39,7 @@ export default class Message {
     this.state = START;
     this.startTime = Date.now();
     this.endTime = this.startTime + this.duration;
-    console.log(this.id, this.startTime, this.endTime);
+    // console.log(this.id, this.startTime, this.endTime);
   }
 
   isExpired() {

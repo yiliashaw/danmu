@@ -1,11 +1,14 @@
 <template>
   <div id="app">
-    <button class="add" @click="addMessage()">{{message}}</button>
+    <button class="add" @click="addMessageMultiple(10)">{{message}}</button>
       <div class="wrap">
-          <div class="track" v-for="item in danmuData" :key="item.id">
+          <div class="track" 
+            v-for="item in danmuData" 
+            :key="item.id">
             <Message
               v-for="message in item.children"
               :key="message.id"
+              :data-id="message.id"
               :duration="message.duration"
               :content="message.id + ':' + message.content"
             ></Message>
@@ -39,7 +42,7 @@ export default {
         '这是一个字数递增的句子'
       ],
       list: [],
-      danmuData: [],
+      danmuData: manager.getData(),
       queue: [],
       to: null,
       pushTimer: null
@@ -50,16 +53,19 @@ export default {
       const { length } = this.randomDanmu;
       const message = this.randomDanmu[Math.floor(Math.random() * length + 0)];
       console.log('push-->', message);
-      this.queue.push(message);
+      // this.queue.push(message);
+      manager.add({
+        content: message,
+      });
     },
     addMessageMultiple(count) {
       for (let i = 0; i < count; ++i) {
         this.addMessage();
       }
     },
-    updateDanmu() {
-      this.danmuData = manager.getData();
-    },
+    // updateDanmu() {
+    //   this.danmuData = manager.getData();
+    // },
 
     setIntervalAddMessage() {
       if (this.queue.length > 0) {
@@ -77,8 +83,8 @@ export default {
   },
 
   mounted() {
-    this.updateDanmu();
-    manager.on('update', this.updateDanmu);
+    // this.updateDanmu();
+    // manager.on('update', this.updateDanmu);
 
     let to, pushTimer;
     const tickInterval = 200;
@@ -91,21 +97,21 @@ export default {
 
     this.to = setTimeout(tick, tickInterval);
 
-    const push = () => {
-      if (this.queue.length > 0) {
-        const content = this.queue[0];
-        manager.add({
-          content
-        });
-        this.queue.shift();
-      } else {
-        // do nothing
-      }
+    // const push = () => {
+    //   if (this.queue.length > 0) {
+    //     const content = this.queue[0];
+    //     manager.add({
+    //       content
+    //     });
+    //     this.queue.shift();
+    //   } else {
+    //     // do nothing
+    //   }
 
-      this.pushTimer = setTimeout(push, 500);
-    };
+    //   this.pushTimer = setTimeout(push, 500);
+    // };
 
-    this.pushTimer = setTimeout(push, 500);
+    // this.pushTimer = setTimeout(push, 500);
 
     // this.$on("add", (option) => manager.add(option));
     // this.tracks = manager.tracks;

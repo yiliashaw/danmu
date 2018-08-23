@@ -2,14 +2,12 @@ import Message from './message';
 import Track from './track';
 import EventEmitter from 'eventemitter3';
 
-const MAX_TRACKS = 3;
+const MAX_TRACKS = 1;
 const MAX_MESSAGE_COUNT = 12;
 const BASE_TOP = 80;
 
-export default class Manager extends EventEmitter {
+export default class Manager {
   constructor() {
-    super();
-
     this.pending = [];
     this.tracks = [];
     this.init();
@@ -29,9 +27,11 @@ export default class Manager extends EventEmitter {
     if (track) {
       console.log('add:', message.id);
       track.addChild(message);
-      if (track === this.tracks[0])
-        console.log(track.children.map((a, i) => [a.id, a.startTime - (track.children[i - 1] ? track.children[i - 1].startTime : 0)]));
-      this.emit('update');
+      // if (track === this.tracks[0]) {
+
+      // }
+        // console.log(track.children.map((a, i) => [a.id, a.startTime - (track.children[i - 1] ? track.children[i - 1].startTime : 0)]));
+      // this.emit('update');
       return true;
     }
 
@@ -61,7 +61,7 @@ export default class Manager extends EventEmitter {
     });
 
     if (!this.addMessage(message)) {
-      console.log('pending:', message.id);
+      // console.log('pending:', message.id);
       this.pending.push(message);
     }
   }
