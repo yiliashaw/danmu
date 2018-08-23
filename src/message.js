@@ -43,7 +43,7 @@ export default class Message {
   }
 
   isExpired() {
-    return this.state === START && 
+    return this.state === START &&
       Date.now() > this.endTime;
   }
 

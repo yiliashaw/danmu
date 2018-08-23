@@ -1,10 +1,10 @@
 <template>
-  <div 
+  <div
     class="text"
     :style="{
-      // 'animation-duration': duration/1000 + 's',
-      'transition-duration': duration/1000 + 's',
-      transform: isAnimated ? 'translateX(-750px)' : 'translateX(0)'
+      'animation-duration': duration/1000 + 's',
+      // 'transition-duration': duration/1000 + 's',
+      // transform: isAnimated ? 'translateX(-750px)' : 'translateX(0)'
     }"
   >
     {{content}}
@@ -49,7 +49,7 @@ export default {
   transform: translateX(0);
   /* transition: transform 1s linear; */
   /* font-size: 24px; */
-  /* animation: moveLeft 5s linear; */
+  animation: moveLeft 5s linear;
 
 }
 
@@ -59,7 +59,7 @@ export default {
   }
 
   100% {
-    transform: translateX(-750px);
+    transform: translateX(-1000px);
   }
 }
 </style>

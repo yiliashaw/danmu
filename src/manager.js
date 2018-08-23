@@ -3,6 +3,7 @@ import Track from './track';
 import EventEmitter from 'eventemitter3';
 
 const MAX_TRACKS = 3;
+const MAX_MESSAGE_COUNT = 12;
 const BASE_TOP = 80;
 
 export default class Manager extends EventEmitter {
@@ -20,15 +21,20 @@ export default class Manager extends EventEmitter {
   }
 
   addMessage(message) {
+    const count = this.currentMessageCount();
+    if (count >= MAX_MESSAGE_COUNT) {
+      return false;
+    }
     const track = this.getIdleTrack();
     if (track) {
+      console.log('add:', message.id);
       track.addChild(message);
-      if(track === this.tracks[0])
-      console.log(track.children.map((a, i) => [a.id, a.startTime - (track.children[i - 1] ? track.children[i - 1].startTime : 0)]));
+      if (track === this.tracks[0])
+        console.log(track.children.map((a, i) => [a.id, a.startTime - (track.children[i - 1] ? track.children[i - 1].startTime : 0)]));
       this.emit('update');
       return true;
-    } 
-    
+    }
+
     return false;
   }
 
@@ -40,18 +46,30 @@ export default class Manager extends EventEmitter {
     return cur;
   }
 
-  add({ content, fontSize, duration, windowWidth }) {
-    const message = new Message({ 
+  add({
+    content,
+    fontSize,
+    duration,
+    windowWidth
+  }) {
+    const message = new Message({
       id: this.nextID(),
-      content, 
-      fontSize, 
-      duration, 
-      windowWidth 
+      content,
+      fontSize,
+      duration,
+      windowWidth
     });
-    
+
     if (!this.addMessage(message)) {
+      console.log('pending:', message.id);
       this.pending.push(message);
     }
+  }
+
+  currentMessageCount() {
+    return this.tracks.reduce((a, c) => {
+      return a * 1 + c.children.length
+    });
   }
 
   consumePending() {
