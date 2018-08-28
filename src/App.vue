@@ -55,7 +55,7 @@ export default {
         '这是一个字数递增的句子这是一个字数递增的句子'
       ],
       list: [],
-      danmuData: [],
+      danmuData: manager.getData(),
       queue: [],
       to: null,
       pushTimer: null

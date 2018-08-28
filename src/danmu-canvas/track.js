@@ -43,11 +43,12 @@ export default class Track {
   }
 
   garbageCollect() {
-    this.children.forEach(child => {
+    for (let i = this.children.length - 1; i > -1; --i) {
+      const child = this.children[i];
       if (child.isExpired()) {
         console.log('垃圾回收--》', child.id, child.startTime, Date.now());
         this.removeChild(child);
       }
-    });
+    }
   }
 }
