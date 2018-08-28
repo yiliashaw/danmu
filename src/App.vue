@@ -1,43 +1,48 @@
 <template>
   <div id="app">
     <div class="action" style="display:flex">
-    <div class="add" @click="addMessageMultiple(15)">{{message}}</div>
-    <div class="add" @click="cleanDanmu">清除弹幕</div>
+      <div class="add" @click="addMessageMultiple(15)">发送弹幕</div>
+      <div class="add" @click="cleanDanmu">清除弹幕</div>
+    </div>
+
+    <div class="wrap" :style="{width: windowWidth+'px'}">
+      <div class="track" v-for="item in danmuData" :key="item.id">
+        <transition-group name="left" v-on:leave="leave" v-on:after-leave="afterLeave">
+          <div
+            class="text"
+            v-for="message in item.children"
+            :key="message.id"
+            :style="{
+              'animation-duration': message.duration/1000 + 's',
+              fontSize: message.fontSize + 'px',
+            }"
+          >
+            {{message.content}}
+          </div>
+        </transition-group>
+      </div>
+    </div>
+
+    <div class="wrap-canvas">
 
     </div>
-      <div class="wrap">
-          <div class="track" v-for="item in danmuData" :key="item.id">
-            <transition-group name="left" v-on:leave="leave" v-on:after-leave="afterLeave">
-              <div class="text" v-for="message in item.children" :key="message.id" ref="messages"
-              :style="{
-                'animation-duration': message.duration/1000 + 's',
-                fontSize: message.fontSize + 'px',
-              }">
-              {{message.content}}
-              </div>
-             </transition-group>
-          </div>
-      </div>
   </div>
 </template>
 
 <script>
-import Message from './components/Message';
 import Manager from './danmu-dom/manager';
 const manager = new Manager();
-const fontSize = 18;
-const windowWidth = 750;
-const duration = 8000;
 
 export default {
-  components: {
-    Message
-  },
   data() {
     return {
-      message: '发送弹幕',
+      message: '',
+      fontSize: 18,
+      windowWidth: 750,
+      duration: 8000,
+      tickInterval: 20,
       randomDanmu: [
-        '哦',
+        '噢',
         '你好',
         '我很好',
         '所以你呢',
@@ -52,13 +57,15 @@ export default {
         '这是一个字数递增的句子我很好',
         '这是一个字数递增的句子你还好吗',
         '这是一个字数递增的句子我也非常好',
+        '这是一个字数递增的句子我也非常好好',
+        '这是一个字数递增的句子我也非常好好好',
+        '这是一个字数递增的句子我也非常好好好好',
+        '这是一个字数递增的句子我也非常好好好好好',
+        '这是一个字数递增的句子我也非常好好好好好好',
         '这是一个字数递增的句子这是一个字数递增的句子'
       ],
-      list: [],
-      danmuData: manager.getData(),
-      queue: [],
-      to: null,
-      pushTimer: null
+      danmuData: [],
+      tickTimer: null
     };
   },
 
@@ -67,12 +74,15 @@ export default {
       const { length } = this.randomDanmu;
       const content = this.randomDanmu[Math.floor(Math.random() * length + 0)];
       console.log('push-->');
-      // this.queue.push(content);
       manager.add({
         content,
-        fontSize,
-        duration
+        fontSize: this.fontSize,
+        duration: this.duration
       });
+
+      if (!this.tickTimer) {
+        this.tickTimer = setTimeout(this.tick, this.tickInterval);
+      }
     },
 
     addMessageMultiple(count) {
@@ -83,57 +93,30 @@ export default {
 
     cleanDanmu() {
       manager.cleanAll();
-      clearTimeout(this.to);
+      clearTimeout(this.tickTimer);
+      this.tickTimer = null;
+    },
+
+    tick() {
+      manager.tick();
+      this.tickTimer = setTimeout(this.tick, this.tickInterval);
     },
 
     updateDanmu() {
       this.danmuData = manager.getData();
-      // this.$nextTick(() => {
-      //   this.$refs.messages &&
-      //     this.$refs.messages.forEach(message => {
-      //       console.dir(message);
-
-      //       message.addEventListener('animationend', e => {
-      //         console.log(
-      //           'animation end',
-      //           e.target.innerText,
-      //           e.target.dataset.message,
-      //           e.target.dataset.track
-      //         );
-      //       });
-      //     });
-      // });
     },
 
-    garbageCollect(message, track, e) {
-      // console.log('message', message.id, track.id, message, track, e);
-      // manager.gc(message, track);
-    },
     afterLeave(el) {
-      console.log('after leave');
+      // console.log('after leave');
     },
     leave(el) {
-      console.log('leave');
+      // console.log('leave');
     }
   },
 
   mounted() {
-    // this.addMessageMultiple(5);
-
-    // console.log('ref', this.$refs);
-
     this.updateDanmu();
     manager.on('update', this.updateDanmu);
-
-    let to, pushTimer;
-    const tickInterval = 20;
-
-    const tick = () => {
-      manager.tick();
-
-      this.to = setTimeout(tick, tickInterval);
-    };
-    this.to = setTimeout(tick, tickInterval);
   }
 };
 </script>

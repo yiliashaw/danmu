@@ -34,10 +34,6 @@ export default class Track {
     // child.parent = null;
   }
 
-  lastChild() {
-    return this.children[this.children.length - 1];
-  }
-
   removeAllChildren() {
     this.children.splice(0, this.children.length);
   }
@@ -45,7 +41,7 @@ export default class Track {
   garbageCollect() {
     this.children.forEach(child => {
       if (child.isExpired()) {
-        console.log('垃圾回收--》', child.id, child.startTime, Date.now());
+        // console.log('垃圾回收--》', child.id, child.startTime, Date.now());
         this.removeChild(child);
       }
     });

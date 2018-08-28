@@ -1,4 +1,3 @@
-
 const INIT = 0;
 const START = 1;
 const ANIMATE = 2
@@ -19,8 +18,7 @@ export default class Message {
     this.fontSize = fontSize;
     this.duration = duration;
     this.windowWidth = windowWidth;
-    this.owner = owner;
-    this.startTime =  null;
+    this.startTime = null;
     this.endTime = null;
     this.speed = 0;
     this.width = 0;
@@ -32,15 +30,14 @@ export default class Message {
 
   init() {
     this.width = this.content.length * this.fontSize;
-    this.speed = this.windowWidth / this.duration;  // px/s
-    // this.state = START;
+    this.speed = this.windowWidth / this.duration; // px/s
   }
 
   start() {
     this.state = START;
     this.startTime = Date.now();
     this.endTime = this.startTime + this.duration;
-    console.log('开始动--》', this.id, this.endTime-this.startTime, this.width,this.windowWidth);
+    // console.log('开始动--》', this.id, this.endTime - this.startTime, this.width, this.windowWidth);
   }
 
   isExpired() {

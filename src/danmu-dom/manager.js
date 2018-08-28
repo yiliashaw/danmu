@@ -3,7 +3,7 @@ import Track from './track';
 import EventEmitter from 'eventemitter3';
 
 const MAX_TRACKS = 5;
-const MAX_MESSAGE_COUNT = 20;
+// const MAX_MESSAGE_COUNT = 20;
 const BASE_TOP = 50;
 
 export default class Manager extends EventEmitter {
@@ -20,49 +20,20 @@ export default class Manager extends EventEmitter {
     return this.tracks.find(track => track.canAddChild())
   }
 
-  isWindowClear() {
-    return this.tracks.every(track => {
-      const lastChild = track.lastChild();
-      if (lastChild) {
-        return lastChild.isExpired()
-      }
-      return true;
-    });
-  }
-
-  totalMessageCount() {
-    return this.tracks.map(track => track.children.length).reduce((a, c) => a + c);
-  }
-
   addMessage(message) {
-
     const track = this.getIdleTrack();
     if (track) {
-      // if (this.totalMessageCount() >= MAX_MESSAGE_COUNT && this.isWindowClear()) {
-      //   this.garbageCollect();
-      //   return false;
-      // } else if (this.totalMessageCount() >= MAX_MESSAGE_COUNT) {
-      //   return false;
-      // }
-      console.log('add:', message.id);
+      // console.log('add:', message.id);
       track.addChild(message);
-      // if (track === this.tracks[0])
-      // console.log(track.children.map((a, i) => [a.id, a.startTime - (track.children[i - 1] ? track.children[i - 1].startTime : 0)]));
       this.emit('update');
-
-
-
       return true;
     }
-
     return false;
   }
 
   nextID() {
     const cur = this.currentID + 1;
-
     this.currentID = cur;
-
     return cur;
   }
 
@@ -84,13 +55,8 @@ export default class Manager extends EventEmitter {
     });
 
     if (!this.addMessage(message)) {
-      console.log('pending:', message.id);
-      if (message.owner) {
-        this.pending.unshift(message);
-      } else {
-        this.pending.push(message);
-      }
-
+      // console.log('pending:', message.id);
+      this.pending.push(message);
     }
   }
 
@@ -109,11 +75,10 @@ export default class Manager extends EventEmitter {
   }
 
   cleanAll() {
-    this.pending = [];
+    // this.pending = [];
     this.tracks.forEach(track => {
       track.removeAllChildren();
     });
-
     this.emit('update');
   }
 
@@ -124,28 +89,9 @@ export default class Manager extends EventEmitter {
     });
   }
 
-  gc(message, track) {
-    this.tracks.find(item => item === track).removeChild(message);
-    this.emit('update');
-  }
-
   tick() {
     this.garbageCollect();
-    // console.log('windowclear', this.isWindowClear());
-    // console.log('totalMessageCount', this.totalMessageCount());
-
     this.consumePending();
-
-    // if (this.totalMessageCount() < MAX_MESSAGE_COUNT) {
-    //   this.consumePending();
-    // } else if (this.totalMessageCount() >= MAX_MESSAGE_COUNT && this.isWindowClear()) {
-    //   this.garbageCollect();
-    //   // this.tracks.forEach(track => {
-    //   //   track.removeAllChildren();
-    //   // });
-
-    //   // this.emit('update');
-    // }
   }
 
   init() {
