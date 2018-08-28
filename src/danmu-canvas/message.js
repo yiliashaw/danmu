@@ -1,4 +1,3 @@
-import DisplayObject from './displayObject';
 
 const INIT = 0;
 const START = 1;
@@ -9,16 +8,18 @@ const END = 3;
 export default class Message {
   constructor({
     id = 0,
-    content = 0,
-    fontSize = 16, // px
+    content = '',
+    fontSize = 36, // px
     duration = 5 * 1000, // 5s
     windowWidth = 750,
+    owner = false,
   }) {
     this.id = id;
     this.content = content;
     this.fontSize = fontSize;
     this.duration = duration;
     this.windowWidth = windowWidth;
+    this.owner = owner;
     this.startTime =  null;
     this.endTime = null;
     this.speed = 0;
@@ -39,7 +40,7 @@ export default class Message {
     this.state = START;
     this.startTime = Date.now();
     this.endTime = this.startTime + this.duration;
-    console.log(this.id, this.startTime, this.endTime);
+    // console.log('开始动--》', this.id, this.endTime-this.startTime, this.width,this.windowWidth);
   }
 
   isExpired() {

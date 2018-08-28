@@ -3,8 +3,7 @@
     class="text"
     :style="{
       'animation-duration': duration/1000 + 's',
-      // 'transition-duration': duration/1000 + 's',
-      // transform: isAnimated ? 'translateX(-750px)' : 'translateX(0)'
+      fontSize: fontSize + 'px',
     }"
   >
     {{content}}
@@ -15,24 +14,19 @@
 export default {
   props: {
     content: {
-      type: String,
+      type: String
     },
     duration: {
-      type: Number,
+      type: Number
     },
+    fontSize: {
+      type: Number
+    }
   },
   data() {
-    return {
-      isAnimated: false,
-    };
+    return {};
   },
-  mounted() {
-    requestAnimationFrame(() => {
-      requestAnimationFrame(() => {
-        this.isAnimated = true;
-      });
-    });
-  },
+  mounted() {}
 };
 </script>
 
@@ -48,9 +42,12 @@ export default {
   white-space: nowrap;
   transform: translateX(0);
   /* transition: transform 1s linear; */
-  /* font-size: 24px; */
+  font-size: 26px;
   animation: moveLeft 5s linear;
-
+  background: rgba(255, 255, 255, 8);
+  padding: 5px 15px;
+  border-radius: 50px;
+  color: #232323;
 }
 
 @keyframes moveLeft {
@@ -59,7 +56,7 @@ export default {
   }
 
   100% {
-    transform: translateX(-1000px);
+    transform: translateX(-1800px);
   }
 }
 </style>

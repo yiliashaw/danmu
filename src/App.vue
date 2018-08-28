@@ -1,14 +1,21 @@
 <template>
   <div id="app">
-    <button class="add" @click="addMessage()">{{message}}</button>
+    <div class="action" style="display:flex">
+    <div class="add" @click="addMessageMultiple(15)">{{message}}</div>
+    <div class="add" @click="cleanDanmu">清除弹幕</div>
+
+    </div>
       <div class="wrap">
           <div class="track" v-for="item in danmuData" :key="item.id">
-            <Message
-              v-for="message in item.children"
-              :key="message.id"
-              :duration="message.duration"
-              :content="message.id + ':' + message.content"
-            ></Message>
+            <transition-group name="left" v-on:leave="leave" v-on:after-leave="afterLeave">
+              <div class="text" v-for="message in item.children" :key="message.id" ref="messages"
+              :style="{
+                'animation-duration': message.duration/1000 + 's',
+                fontSize: message.fontSize + 'px',
+              }">
+              {{message.content}}
+              </div>
+             </transition-group>
           </div>
       </div>
   </div>
@@ -16,8 +23,11 @@
 
 <script>
 import Message from './components/Message';
-import Manager from './manager';
+import Manager from './danmu-dom/manager';
 const manager = new Manager();
+const fontSize = 18;
+const windowWidth = 750;
+const duration = 8000;
 
 export default {
   components: {
@@ -36,7 +46,13 @@ export default {
         '可是我还不知道',
         '那你怎么才能知道',
         '这是一个字数递增的',
-        '这是一个字数递增的句子'
+        '这是一个字数递增的句子',
+        '这是一个字数递增的句子啊',
+        '这是一个字数递增的句子你好',
+        '这是一个字数递增的句子我很好',
+        '这是一个字数递增的句子你还好吗',
+        '这是一个字数递增的句子我也非常好',
+        '这是一个字数递增的句子这是一个字数递增的句子'
       ],
       list: [],
       danmuData: [],
@@ -45,70 +61,79 @@ export default {
       pushTimer: null
     };
   },
+
   methods: {
     addMessage() {
       const { length } = this.randomDanmu;
-      const message = this.randomDanmu[Math.floor(Math.random() * length + 0)];
-      console.log('push-->', message);
-      this.queue.push(message);
+      const content = this.randomDanmu[Math.floor(Math.random() * length + 0)];
+      console.log('push-->');
+      // this.queue.push(content);
+      manager.add({
+        content,
+        fontSize,
+        duration
+      });
     },
+
     addMessageMultiple(count) {
       for (let i = 0; i < count; ++i) {
         this.addMessage();
       }
     },
-    updateDanmu() {
-      this.danmuData = manager.getData();
+
+    cleanDanmu() {
+      manager.cleanAll();
+      clearTimeout(this.to);
     },
 
-    setIntervalAddMessage() {
-      if (this.queue.length > 0) {
-        const content = this.queue[0];
-        manager.add({
-          content
-        });
-        this.queue.shift();
-      } else {
-        // do nothing
-      }
+    updateDanmu() {
+      this.danmuData = manager.getData();
+      // this.$nextTick(() => {
+      //   this.$refs.messages &&
+      //     this.$refs.messages.forEach(message => {
+      //       console.dir(message);
 
-      setTimeout(setIntervalAddMessage, 500);
+      //       message.addEventListener('animationend', e => {
+      //         console.log(
+      //           'animation end',
+      //           e.target.innerText,
+      //           e.target.dataset.message,
+      //           e.target.dataset.track
+      //         );
+      //       });
+      //     });
+      // });
+    },
+
+    garbageCollect(message, track, e) {
+      // console.log('message', message.id, track.id, message, track, e);
+      // manager.gc(message, track);
+    },
+    afterLeave(el) {
+      console.log('after leave');
+    },
+    leave(el) {
+      console.log('leave');
     }
   },
 
   mounted() {
+    // this.addMessageMultiple(5);
+
+    // console.log('ref', this.$refs);
+
     this.updateDanmu();
     manager.on('update', this.updateDanmu);
 
     let to, pushTimer;
-    const tickInterval = 200;
+    const tickInterval = 20;
 
     const tick = () => {
       manager.tick();
 
       this.to = setTimeout(tick, tickInterval);
     };
-
     this.to = setTimeout(tick, tickInterval);
-
-    const push = () => {
-      if (this.queue.length > 0) {
-        const content = this.queue[0];
-        manager.add({
-          content
-        });
-        this.queue.shift();
-      } else {
-        // do nothing
-      }
-
-      this.pushTimer = setTimeout(push, 500);
-    };
-
-    this.pushTimer = setTimeout(push, 500);
-
-    // this.$on("add", (option) => manager.add(option));
-    // this.tracks = manager.tracks;
   }
 };
 </script>
@@ -127,19 +152,62 @@ export default {
   margin-top: 60px;
 }
 
+.add {
+  width: 100px;
+  height: 40px;
+  line-height: 40px;
+  text-align: center;
+  margin-bottom: 50px;
+  margin-left: 50px;
+  background: transparent;
+  border: 2px solid #2c3e50;
+  border-radius: 5px;
+}
+
+.add:hover {
+  cursor: pointer;
+}
+
 .wrap {
-  width: 500px;
-  height: 400px;
-  background: darkseagreen;
+  width: 750px;
+  height: 300px;
+  background: #555555;
   position: relative;
-  /* margin-left: 300px; */
 }
 
 .wrap .track {
   position: relative;
   width: 100%;
-  height: 100px;
+  height: 30px;
   margin-bottom: 20px;
-  background-color: cadetblue;
+  color: #ffffff;
+}
+
+.text {
+  position: absolute;
+  text-align: left;
+  top: 50%;
+  left: 100%;
+  white-space: nowrap;
+  transform: translateX(0);
+  font-size: 18px;
+  background: rgba(255, 255, 255, 8);
+  padding: 5px 15px;
+  border-radius: 50px;
+  color: #555555;
+  /* animation-fill-mode: forwards; */
+}
+.left-enter-active {
+  animation: moveLeft 5s linear;
+}
+
+@keyframes moveLeft {
+  0% {
+    transform: translateX(0);
+  }
+
+  100% {
+    transform: translateX(-1800px);
+  }
 }
 </style>
