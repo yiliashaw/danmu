@@ -8,6 +8,7 @@ export default class Track {
     this.children = [];
   }
 
+
   canAddChild() {
     if (this.children && this.children.length <= 0) {
       return true;
@@ -25,7 +26,6 @@ export default class Track {
     this.children.push(child);
     child.top = this.top;
     // child.parent = this;
-    child.start();
   }
 
   removeChild(child) {
@@ -34,21 +34,20 @@ export default class Track {
     // child.parent = null;
   }
 
-  lastChild() {
-    return this.children[this.children.length - 1];
-  }
-
   removeAllChildren() {
     this.children.splice(0, this.children.length);
   }
 
+  update() {
+    this.children.forEach(child => child.update());
+  }
+
   garbageCollect() {
-    for (let i = this.children.length - 1; i > -1; --i) {
-      const child = this.children[i];
+    this.children.forEach(child => {
       if (child.isExpired()) {
-        console.log('垃圾回收--》', child.id, child.startTime, Date.now());
+        // console.log('垃圾回收--》', child.id, child.startTime, Date.now());
         this.removeChild(child);
       }
-    }
+    });
   }
 }

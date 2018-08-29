@@ -4,7 +4,7 @@
       <div class="add" @click="addMessageMultiple(15)">发送弹幕</div>
       <div class="add" @click="cleanDanmu">清除弹幕</div>
     </div>
-
+  <!-- DOM -->
     <div class="wrap" :style="{width: windowWidth+'px'}">
       <div class="track" v-for="item in danmuData" :key="item.id">
         <transition-group name="left" v-on:leave="leave" v-on:after-leave="afterLeave">
@@ -23,14 +23,17 @@
       </div>
     </div>
 
-    <div class="wrap-canvas">
-
+  <!-- Canvas -->
+    <div class="wrap" style="margin-top: 30px">
+      <canvas id="danmu-canvas" :width="windowWidth" height="300px"></canvas>
     </div>
   </div>
 </template>
 
 <script>
 import Manager from './danmu-dom/manager';
+import CanvasManager from './danmu-canvas/manager.js';
+
 const manager = new Manager();
 
 export default {
@@ -65,7 +68,9 @@ export default {
         '这是一个字数递增的句子这是一个字数递增的句子'
       ],
       danmuData: [],
-      tickTimer: null
+      tickTimer: null,
+      context: null,
+      canvasManager: null
     };
   },
 
@@ -89,6 +94,8 @@ export default {
       for (let i = 0; i < count; ++i) {
         this.addMessage();
       }
+
+      this.canvasManager.drawSingleDanmu('我爱北京天安门,天安门上太阳升');
     },
 
     cleanDanmu() {
@@ -109,6 +116,7 @@ export default {
     afterLeave(el) {
       // console.log('after leave');
     },
+
     leave(el) {
       // console.log('leave');
     }
@@ -117,6 +125,8 @@ export default {
   mounted() {
     this.updateDanmu();
     manager.on('update', this.updateDanmu);
+    this.context = document.getElementById('danmu-canvas').getContext('2d');
+    this.canvasManager = new CanvasManager(this.context);
   }
 };
 </script>

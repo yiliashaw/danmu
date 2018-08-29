@@ -1,165 +1,205 @@
-import Message from './message';
-import Track from './track';
-import EventEmitter from 'eventemitter3';
+  import Message from './message';
+  import Track from './track';
+  import EventEmitter from 'eventemitter3';
 
-const MAX_TRACKS = 3;
-const MAX_MESSAGE_COUNT = 80;
-const BASE_TOP = 50;
+  const MAX_TRACKS = 5;
+  // const MAX_MESSAGE_COUNT = 20;
+  const BASE_TOP = 50;
 
-export default class Manager extends EventEmitter {
-  constructor(id) {
-    super();
+  const MARGIN = 10;
+  const PADDING = 10;
+  const HEIGHT = 30;
 
-    // this.canvasContext = createCanvasContext(id);
-    this.animationTimer = null;
-    this.lastFrameTime = 0;
+  export default class Manager extends EventEmitter {
+    constructor(context) {
+      super();
 
-    this.pending = [];
-    this.tracks = [];
-    this.init();
-    this.currentID = 0;
-  }
+      this.context = context;
 
-  raf(callback) { // requestAnimationFrame
-    const now = Date.now();
-    const timeToCall = Math.max(0, 16 - (now - this.lastFrameTime));
-    this.animationTimer = setTimeout(() => {
-      callback(now + timeToCall);
-    }, timeToCall);
-    return this.animationTimer;
+      // this.canvasContext = createCanvasContext(id);
+      this.animationTimer = null;
+      this.lastFrameTime = 0;
 
-  }
-
-  caf() { // cancelAnimationFrame
-    clearTimeout(this.animationTimer);
-  }
-
-  getIdleTrack() {
-    return this.tracks.find(track => track.canAddChild())
-  }
-
-  isWindowClear() {
-    return this.tracks.every(track => {
-      const lastChild = track.lastChild();
-      if (lastChild) {
-        return lastChild.isExpired()
-      }
-      return true;
-    });
-  }
-
-  totalMessageCount() {
-    return this.tracks.map(track => track.children.length).reduce((a, c) => a + c);
-  }
-
-  addMessage(message) {
-
-    const track = this.getIdleTrack();
-    if (track) {
-      if (this.totalMessageCount() >= MAX_MESSAGE_COUNT && this.isWindowClear()) {
-        this.garbageCollect();
-        return false;
-      } else if (this.totalMessageCount() >= MAX_MESSAGE_COUNT) {
-        return false;
-      }
-      // console.log('add:', message.id);
-      track.addChild(message);
-      // if (track === this.tracks[0])
-      // console.log(track.children.map((a, i) => [a.id, a.startTime - (track.children[i - 1] ? track.children[i - 1].startTime : 0)]));
-      this.emit('update');
-
-
-
-      return true;
+      this.pending = [];
+      this.tracks = [];
+      this.init();
+      this.currentID = 0;
     }
 
-    return false;
-  }
+    raf(callback) { // requestAnimationFrame
+      const now = Date.now();
+      const timeToCall = Math.max(0, 16 - (now - this.lastFrameTime));
+      this.animationTimer = setTimeout(() => {
+        callback(now + timeToCall);
+      }, timeToCall);
+      return this.animationTimer;
 
-  nextID() {
-    const cur = this.currentID + 1;
+    }
 
-    this.currentID = cur;
+    caf() { // cancelAnimationFrame
+      clearTimeout(this.animationTimer);
+    }
 
-    return cur;
-  }
+    drawRect(options) {
+      const {
+        context,
+        color,
+        x,
+        y,
+        w,
+        h,
+        r
+      } = options;
+      console.log('options', options);
 
-  add({
-    content,
-    fontSize,
-    duration,
-    windowWidth,
-    owner,
-  }) {
-    const id = this.nextID();
-    const message = new Message({
-      id,
-      content: `${content}:${id}`,
+      context.save();
+      context.fillStyle = color;
+      context.beginPath();
+      context.moveTo(x, y);
+
+      context.lineTo(x + w - r, y);
+      context.arc(x + w - r, y + r, r, 1.5 * Math.PI, 2 * Math.PI);
+
+      context.lineTo(x + w, y + h - r);
+      context.arc(x + w - r, y + h - r, r, 0, 0.5 * Math.PI);
+
+      context.lineTo(x + r, y + h);
+      context.arc(x + r, y + h - r, r, 0.5 * Math.PI, 1 * Math.PI);
+
+      context.lineTo(x, y + r);
+      context.arc(x + r, y + r, r, Math.PI, 1.5 * Math.PI);
+
+      context.fill();
+      context.closePath();
+
+      context.restore();
+    }
+
+    drawSingleDanmu(text) {
+      const context = this.context;
+      const message = new Message({
+        text,
+        context,
+        padding: PADDING
+      });
+      const {
+        options
+      } = message;
+
+      console.log(message);
+      // draw rect
+      const radius = HEIGHT / 2;
+      const beginX = message.x + HEIGHT + MARGIN;
+
+      this.drawRect({
+        context,
+        color: options.backgroundColor,
+        x: message.x,
+        y: message.y,
+        w: message.danmuWidth,
+        h: HEIGHT,
+        r: radius
+      });
+
+
+      // draw text
+
+      context.font = message.font;
+      context.textBaseline = 'top';
+      context.fillStyle = options.color;
+
+      context.fillText(message.text, message.x + message.padding, message.y + 5);
+
+      message.update();
+    }
+
+
+
+    getIdleTrack() {
+      return this.tracks.find(track => track.canAddChild())
+    }
+
+    addMessage(message) {
+      const track = this.getIdleTrack();
+      if (track) {
+        // console.log('add:', message.id);
+        track.addChild(message);
+        this.emit('update');
+        return true;
+      }
+      return false;
+    }
+
+    nextID() {
+      const cur = this.currentID + 1;
+      this.currentID = cur;
+      return cur;
+    }
+
+    add({
+      content,
       fontSize,
       duration,
       windowWidth,
-      owner
-    });
+      owner,
+    }) {
+      const id = this.nextID();
+      const message = new Message({
+        id,
+        content: `${content}:${id}`,
+        fontSize,
+        duration,
+        windowWidth,
+        owner
+      });
 
-    if (!this.addMessage(message)) {
-      // console.log('pending:', message.id);
-      if (message.owner) {
-        this.pending.unshift(message);
-      } else {
+      if (!this.addMessage(message)) {
+        // console.log('pending:', message.id);
         this.pending.push(message);
       }
-
     }
-  }
 
-  consumePending() {
-    const pending = [];
-    this.pending.forEach(message => {
-      if (!this.addMessage(message)) {
-        pending.push(message);
-      }
-    });
-    this.pending = pending;
-  }
+    consumePending() {
+      const pending = [];
+      this.pending.forEach(message => {
+        if (!this.addMessage(message)) {
+          pending.push(message);
+        }
+      });
+      this.pending = pending;
+    }
 
-  getData() {
-    return this.tracks;
-  }
+    getData() {
+      return this.tracks;
+    }
 
-  cleanAll() {
-    this.pending = [];
-    this.tracks.forEach(track => {
-      track.removeAllChildren();
-    });
-
-    this.emit('update');
-  }
-
-  garbageCollect() {
-    this.tracks.forEach(track => {
-      track.garbageCollect();
+    cleanAll() {
+      // this.pending = [];
+      this.tracks.forEach(track => {
+        track.removeAllChildren();
+      });
       this.emit('update');
-    });
-  }
-
-  tick() {
-    // this.garbageCollect();
-    // console.log('windowclear', this.isWindowClear());
-    // console.log('totalMessageCount', this.totalMessageCount());
-    if (this.totalMessageCount() < MAX_MESSAGE_COUNT) {
-      this.consumePending();
-    } else if (this.totalMessageCount() >= MAX_MESSAGE_COUNT && this.isWindowClear()) {
-      this.garbageCollect();
     }
-  }
 
-  init() {
-    for (let i = 0; i < MAX_TRACKS; i++) {
-      this.tracks[i] = new Track({
-        top: BASE_TOP * i,
-        id: i
+    garbageCollect() {
+      this.tracks.forEach(track => {
+        track.garbageCollect();
+        this.emit('update');
       });
     }
-  }
 
-}
+    tick() {
+      this.garbageCollect();
+      this.consumePending();
+    }
+
+    init() {
+      for (let i = 0; i < MAX_TRACKS; i++) {
+        this.tracks[i] = new Track({
+          top: BASE_TOP * i,
+          id: i
+        });
+      }
+    }
+
+  }
