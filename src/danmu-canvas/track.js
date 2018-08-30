@@ -14,24 +14,30 @@ export default class Track {
       return true;
     }
 
-    const lastChild = this.children[this.children.length - 1];
-    if (lastChild.offsetFromX() > 2) {
+    const minOffsetFromX = Math.min.apply(this, this.children.map(child => child.offsetFromX()));
+
+    // console.log('minOffsetFromX', minOffsetFromX, this.children.map(child => child.offsetFromX()));
+    if (minOffsetFromX > 5) {
       return true;
     }
 
     return false;
   }
 
+  maxOffsetFromX() {
+    return Math.min.apply(this, this.children.map(child => child.offsetFromX()))
+  }
+
   addChild(child) {
     this.children.push(child);
-    child.top = this.top;
-    // child.parent = this;
+    child.y = this.top + child.y;
+    child.parent = this;
   }
 
   removeChild(child) {
     const index = this.children.indexOf(child);
     this.children.splice(index, 1);
-    // child.parent = null;
+    child.parent = null;
   }
 
   removeAllChildren() {

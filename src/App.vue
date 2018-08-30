@@ -43,7 +43,7 @@ export default {
       fontSize: 18,
       windowWidth: 750,
       duration: 8000,
-      tickInterval: 20,
+      tickInterval: 16,
       randomDanmu: [
         '噢',
         '你好',
@@ -84,6 +84,7 @@ export default {
         fontSize: this.fontSize,
         duration: this.duration
       });
+      this.canvasManager.add(content);
 
       if (!this.tickTimer) {
         this.tickTimer = setTimeout(this.tick, this.tickInterval);
@@ -94,18 +95,19 @@ export default {
       for (let i = 0; i < count; ++i) {
         this.addMessage();
       }
-
-      this.canvasManager.drawSingleDanmu('我爱北京天安门,天安门上太阳升');
     },
 
     cleanDanmu() {
       manager.cleanAll();
       clearTimeout(this.tickTimer);
       this.tickTimer = null;
+
+      this.canvasManager.cleanAll();
     },
 
     tick() {
-      manager.tick();
+      // manager.tick();
+      // this.canvasManager.update();
       this.tickTimer = setTimeout(this.tick, this.tickInterval);
     },
 
@@ -125,7 +127,13 @@ export default {
   mounted() {
     this.updateDanmu();
     manager.on('update', this.updateDanmu);
-    this.context = document.getElementById('danmu-canvas').getContext('2d');
+    const canvas = document.getElementById('danmu-canvas');
+    // const devicePixelRatio = window.devicePixelRatio || 1;
+    // canvas.width = this.windowWidth * devicePixelRatio;
+    // canvas.height = 300 * devicePixelRatio;
+
+    this.context = canvas.getContext('2d');
+    console.log('context', devicePixelRatio);
     this.canvasManager = new CanvasManager(this.context);
   }
 };

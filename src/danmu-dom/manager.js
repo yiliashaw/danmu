@@ -101,6 +101,13 @@ export default class Manager extends EventEmitter {
         id: i
       });
     }
+    clearTimeout(this.animationTimer);
+    this.animationTimer = setTimeout(this.update.bind(this), 16);
+  }
+
+  update() {
+    this.tick();
+    this.animationTimer = setTimeout(this.update.bind(this), 16);
   }
 
 }

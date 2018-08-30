@@ -14,24 +14,26 @@ export default class Message {
     x = 0,
     y = 0,
     padding = 0,
-    options = {
-      speed: 1,
-      color: '#111',
-      fontFamily: 'Microsoft Yahei',
-      fontSize: 14,
-      backgroundColor: 'rgba(255, 255, 255, .6)',
-      other: null
-    }
+    speed = 1,
+    windowWidth = 0,
+    options
   }) {
 
     this.id = id;
     this.context = context;
     this.text = text;
-    // this.speed = speed;
     this.x = x;
     this.y = y;
     this.padding = padding;
-    this.options = options;
+    this.speed = speed;
+    this.windowWidth = windowWidth;
+    this.options = Object.assign({}, {
+      color: '#111',
+      fontFamily: 'Microsoft Yahei',
+      fontSize: 14,
+      backgroundColor: 'rgba(255, 255, 255)',
+      other: null
+    }, options);
 
     this.textWidth = 0;
     this.danmuWidth = 0;
@@ -47,9 +49,12 @@ export default class Message {
       return;
     }
 
-    this.x = this.x - this.options.speed
+    this.x = this.x - this.speed
+    // console.log('x-->', this.x);
 
-    if (this.x <= -this.danmuWidth) {
+
+    if (this.x < -this.danmuWidth) {
+      this.parent.removeChild(this)
       this.state = END;
     }
   }
@@ -67,6 +72,6 @@ export default class Message {
   }
 
   offsetFromX() {
-    return this.x + this.danmuWidth
+    return this.windowWidth - this.x - this.danmuWidth;
   }
 }

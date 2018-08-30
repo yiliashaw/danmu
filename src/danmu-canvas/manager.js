@@ -6,6 +6,8 @@
   // const MAX_MESSAGE_COUNT = 20;
   const BASE_TOP = 50;
 
+  const WINDOW_WIDTH = 750;
+  const WINDOW_HEIGHT = 300;
   const MARGIN = 10;
   const PADDING = 10;
   const HEIGHT = 30;
@@ -50,7 +52,6 @@
         h,
         r
       } = options;
-      console.log('options', options);
 
       context.save();
       context.fillStyle = color;
@@ -75,21 +76,16 @@
       context.restore();
     }
 
-    drawSingleDanmu(text) {
+    drawSingleDanmu(message) {
+
       const context = this.context;
-      const message = new Message({
-        text,
-        context,
-        padding: PADDING
-      });
       const {
         options
       } = message;
-
-      console.log(message);
-      // draw rect
       const radius = HEIGHT / 2;
-      const beginX = message.x + HEIGHT + MARGIN;
+      // draw rect
+
+      context.save();
 
       this.drawRect({
         context,
@@ -104,13 +100,16 @@
 
       // draw text
 
+      context.save();
       context.font = message.font;
       context.textBaseline = 'top';
       context.fillStyle = options.color;
-
       context.fillText(message.text, message.x + message.padding, message.y + 5);
+      context.restore();
 
-      message.update();
+      context.restore();
+
+
     }
 
 
@@ -120,11 +119,10 @@
     }
 
     addMessage(message) {
+      // this.calc();
       const track = this.getIdleTrack();
       if (track) {
-        // console.log('add:', message.id);
         track.addChild(message);
-        this.emit('update');
         return true;
       }
       return false;
@@ -136,27 +134,44 @@
       return cur;
     }
 
-    add({
-      content,
-      fontSize,
-      duration,
-      windowWidth,
-      owner,
-    }) {
+    speed() {
+      return Math.floor(Math.random() * 1 + 1);
+    }
+
+    add(text) {
       const id = this.nextID();
       const message = new Message({
-        id,
-        content: `${content}:${id}`,
-        fontSize,
-        duration,
-        windowWidth,
-        owner
+        text,
+        x: WINDOW_WIDTH,
+        y: 10,
+        context: this.context,
+        padding: PADDING,
+        // speed: this.speed(),
+        speed: 1,
+        windowWidth: WINDOW_WIDTH
       });
 
       if (!this.addMessage(message)) {
         // console.log('pending:', message.id);
         this.pending.push(message);
       }
+    }
+
+    update() {
+      if (this.context) {
+        this.context.clearRect(0, 0, WINDOW_WIDTH, WINDOW_HEIGHT);
+      }
+
+      this.tracks.forEach(track => {
+        track.children.forEach(child => {
+          this.drawSingleDanmu(child);
+          child.update();
+        });
+      });
+
+      this.consumePending();
+
+      this.raf(this.update.bind(this));
     }
 
     consumePending() {
@@ -174,23 +189,10 @@
     }
 
     cleanAll() {
-      // this.pending = [];
+      this.pending = [];
       this.tracks.forEach(track => {
         track.removeAllChildren();
       });
-      this.emit('update');
-    }
-
-    garbageCollect() {
-      this.tracks.forEach(track => {
-        track.garbageCollect();
-        this.emit('update');
-      });
-    }
-
-    tick() {
-      this.garbageCollect();
-      this.consumePending();
     }
 
     init() {
@@ -200,6 +202,9 @@
           id: i
         });
       }
+
+      this.raf(this.update.bind(this));
+
     }
 
   }
