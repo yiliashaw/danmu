@@ -7,7 +7,7 @@
   <!-- DOM -->
     <div class="wrap" :style="{width: windowWidth+'px'}">
       <div class="track" v-for="item in danmuData" :key="item.id">
-        <transition-group name="left" v-on:leave="leave" v-on:after-leave="afterLeave">
+        <transition-group name="left">
           <div
             class="text"
             v-for="message in item.children"
@@ -40,10 +40,7 @@ export default {
   data() {
     return {
       message: '',
-      fontSize: 18,
       windowWidth: 750,
-      duration: 8000,
-      tickInterval: 16,
       randomDanmu: [
         '噢',
         '你好',
@@ -68,7 +65,6 @@ export default {
         '这是一个字数递增的句子这是一个字数递增的句子'
       ],
       danmuData: [],
-      tickTimer: null,
       context: null,
       canvasManager: null
     };
@@ -79,16 +75,8 @@ export default {
       const { length } = this.randomDanmu;
       const content = this.randomDanmu[Math.floor(Math.random() * length + 0)];
       console.log('push-->');
-      manager.add({
-        content,
-        fontSize: this.fontSize,
-        duration: this.duration
-      });
+      manager.add(content);
       this.canvasManager.add(content);
-
-      if (!this.tickTimer) {
-        this.tickTimer = setTimeout(this.tick, this.tickInterval);
-      }
     },
 
     addMessageMultiple(count) {
@@ -99,42 +87,30 @@ export default {
 
     cleanDanmu() {
       manager.cleanAll();
-      clearTimeout(this.tickTimer);
-      this.tickTimer = null;
-
       this.canvasManager.cleanAll();
-    },
-
-    tick() {
-      // manager.tick();
-      // this.canvasManager.update();
-      this.tickTimer = setTimeout(this.tick, this.tickInterval);
     },
 
     updateDanmu() {
       this.danmuData = manager.getData();
-    },
-
-    afterLeave(el) {
-      // console.log('after leave');
-    },
-
-    leave(el) {
-      // console.log('leave');
     }
   },
 
   mounted() {
     this.updateDanmu();
     manager.on('update', this.updateDanmu);
+
     const canvas = document.getElementById('danmu-canvas');
-    // const devicePixelRatio = window.devicePixelRatio || 1;
-    // canvas.width = this.windowWidth * devicePixelRatio;
-    // canvas.height = 300 * devicePixelRatio;
+    const devicePixelRatio = window.devicePixelRatio || 1;
+    canvas.width = this.windowWidth * devicePixelRatio;
+    canvas.height = 300 * devicePixelRatio;
 
     this.context = canvas.getContext('2d');
-    console.log('context', devicePixelRatio);
-    this.canvasManager = new CanvasManager(this.context);
+    // console.log('context', this.context);
+
+    this.canvasManager = new CanvasManager({
+      context: this.context,
+      ratio: devicePixelRatio
+    });
   }
 };
 </script>

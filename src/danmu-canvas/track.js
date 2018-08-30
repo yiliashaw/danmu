@@ -1,31 +1,24 @@
 export default class Track {
-  constructor({
-    id,
-    top
-  }) {
+  constructor({ id, top }) {
     this.id = id;
     this.top = top;
     this.children = [];
   }
-
 
   canAddChild() {
     if (this.children && this.children.length <= 0) {
       return true;
     }
 
-    const minOffsetFromX = Math.min.apply(this, this.children.map(child => child.offsetFromX()));
-
-    // console.log('minOffsetFromX', minOffsetFromX, this.children.map(child => child.offsetFromX()));
+    const minOffsetFromX = Math.min.apply(
+      this,
+      this.children.map(child => child.offsetFromX())
+    );
     if (minOffsetFromX > 5) {
       return true;
     }
 
     return false;
-  }
-
-  maxOffsetFromX() {
-    return Math.min.apply(this, this.children.map(child => child.offsetFromX()))
   }
 
   addChild(child) {
@@ -46,14 +39,5 @@ export default class Track {
 
   update() {
     this.children.forEach(child => child.update());
-  }
-
-  garbageCollect() {
-    this.children.forEach(child => {
-      if (child.isExpired()) {
-        // console.log('垃圾回收--》', child.id, child.startTime, Date.now());
-        this.removeChild(child);
-      }
-    });
   }
 }

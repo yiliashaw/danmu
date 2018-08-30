@@ -1,10 +1,7 @@
 const INIT = 0;
 const START = 1;
-const ANIMATE = 2
+const ANIMATE = 2;
 const END = 3;
-
-
-
 
 export default class Message {
   constructor({
@@ -18,7 +15,6 @@ export default class Message {
     windowWidth = 0,
     options
   }) {
-
     this.id = id;
     this.context = context;
     this.text = text;
@@ -27,48 +23,37 @@ export default class Message {
     this.padding = padding;
     this.speed = speed;
     this.windowWidth = windowWidth;
-    this.options = Object.assign({}, {
-      color: '#111',
-      fontFamily: 'Microsoft Yahei',
-      fontSize: 14,
-      backgroundColor: 'rgba(255, 255, 255)',
-      other: null
-    }, options);
+    this.options = Object.assign(
+      {},
+      {
+        color: '#111',
+        fontFamily: 'Microsoft Yahei',
+        fontSize: 14,
+        backgroundColor: 'rgba(255, 255, 255)',
+        other: null
+      },
+      options
+    );
 
     this.textWidth = 0;
     this.danmuWidth = 0;
 
-
-
-    // this.parent = null;
+    this.parent = null;
     this.init();
   }
 
   update() {
-    if (this.state === START) {
-      return;
-    }
-
-    this.x = this.x - this.speed
-    // console.log('x-->', this.x);
-
+    this.x = this.x - this.speed;
 
     if (this.x < -this.danmuWidth) {
-      this.parent.removeChild(this)
-      this.state = END;
+      this.parent.removeChild(this);
     }
   }
 
   init() {
-    this.state = INIT;
-    this.context.font = `${this.options.fontSize}px ${this.options.fontFamily}`;
+    this.context.font = `${this.options.fontSize}px ${ this.options.fontFamily }`;  // for measure text
     this.textWidth = Math.round(this.context.measureText(this.text).width);
-
     this.danmuWidth = this.textWidth + this.padding * 2;
-  }
-
-  isExpired() {
-    return this.state === END;
   }
 
   offsetFromX() {

@@ -4,7 +4,13 @@ import EventEmitter from 'eventemitter3';
 
 const MAX_TRACKS = 5;
 // const MAX_MESSAGE_COUNT = 20;
-const BASE_TOP = 50;
+const TRACK_HEIGHT = 50;
+
+const WINDOW_WIDTH = 750;
+const WINDOW_HEIGHT = 300;
+
+const FONT_SIZE = 18;
+const DURATION = 5000;
 
 export default class Manager extends EventEmitter {
   constructor(id) {
@@ -17,7 +23,7 @@ export default class Manager extends EventEmitter {
   }
 
   getIdleTrack() {
-    return this.tracks.find(track => track.canAddChild())
+    return this.tracks.find(track => track.canAddChild());
   }
 
   addMessage(message) {
@@ -37,21 +43,15 @@ export default class Manager extends EventEmitter {
     return cur;
   }
 
-  add({
-    content,
-    fontSize,
-    duration,
-    windowWidth,
-    owner,
-  }) {
+  add(text, isOwner = false) {
     const id = this.nextID();
     const message = new Message({
       id,
-      content: `${content}:${id}`,
-      fontSize,
-      duration,
-      windowWidth,
-      owner
+      content: `${text}}:${id}`,
+      fontSize: FONT_SIZE,
+      duration: DURATION,
+      windowWidth: WINDOW_WIDTH,
+      owner: isOwner
     });
 
     if (!this.addMessage(message)) {
@@ -75,7 +75,7 @@ export default class Manager extends EventEmitter {
   }
 
   cleanAll() {
-    // this.pending = [];
+    this.pending = [];
     this.tracks.forEach(track => {
       track.removeAllChildren();
     });
@@ -97,7 +97,7 @@ export default class Manager extends EventEmitter {
   init() {
     for (let i = 0; i < MAX_TRACKS; i++) {
       this.tracks[i] = new Track({
-        top: BASE_TOP * i,
+        top: TRACK_HEIGHT * i,
         id: i
       });
     }
@@ -109,5 +109,4 @@ export default class Manager extends EventEmitter {
     this.tick();
     this.animationTimer = setTimeout(this.update.bind(this), 16);
   }
-
 }
