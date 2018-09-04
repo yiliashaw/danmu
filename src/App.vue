@@ -6,6 +6,7 @@
     </div>
   <!-- DOM -->
     <div class="wrap" :style="{width: windowWidth+'px'}">
+      <div>DOM</div>
       <div class="track" v-for="item in danmuData" :key="item.id">
         <transition-group name="left">
           <div
@@ -25,6 +26,7 @@
 
   <!-- Canvas -->
     <div class="wrap" style="margin-top: 30px">
+      <div>Canvas</div>
       <canvas id="danmu-canvas" :width="windowWidth" height="300px"></canvas>
     </div>
   </div>
@@ -100,13 +102,7 @@ export default {
     manager.on('update', this.updateDanmu);
 
     const canvas = document.getElementById('danmu-canvas');
-    const devicePixelRatio = window.devicePixelRatio || 1;
-    canvas.width = this.windowWidth * devicePixelRatio;
-    canvas.height = 300 * devicePixelRatio;
-
     this.context = canvas.getContext('2d');
-    // console.log('context', this.context);
-
     this.canvasManager = new CanvasManager({
       context: this.context,
       ratio: devicePixelRatio
@@ -150,6 +146,7 @@ export default {
   height: 300px;
   background: #555555;
   position: relative;
+  overflow: hidden;
 }
 
 .wrap .track {

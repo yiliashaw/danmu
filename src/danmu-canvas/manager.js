@@ -15,11 +15,10 @@ const FONT_SIZE = 18;
 const PADDING = 10;
 const HEIGHT = FONT_SIZE + PADDING * 2;
 
-const SPEED = 3;
+const SPEED = 1;
 
-export default class Manager extends EventEmitter {
+export default class Manager {
   constructor({ context, ratio = 1 }) {
-    super();
 
     this.context = context;
     this.ratio = ratio;

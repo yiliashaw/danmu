@@ -1,21 +1,41 @@
 # danmu-js
 
-> A Vue.js project
+> vue + js 实现的简单不碰撞弹幕
 
-## Build Setup
+## 预览：
 
-``` bash
-# install dependencies
+```
 npm install
-
-# serve with hot reload at localhost:8080
 npm run dev
-
-# build for production with minification
-npm run build
-
-# build for production and view the bundle analyzer report
-npm run build --report
 ```
 
-For a detailed explanation on how things work, check out the [guide](http://vuejs-templates.github.io/webpack/) and [docs for vue-loader](http://vuejs.github.io/vue-loader).
+http://localhost:8080
+
+## 用法
+
+#### DOM 版：
+
+```
+import Manager from './danmu-dom/manager';
+const manager = new Manager();
+
+// 发送弹幕
+manager.add('this is a message');
+// 更新当前dom
+manager.on('update', this.updateDanmu);
+// 清除所有弹幕
+manager.cleanAll();
+```
+
+#### Canvas 版：
+
+```
+import Manager from './danmu-canvas/manager';
+const canvas = document.getElementById('danmu-canvas');
+const context = canvas.getContext('2d');
+const manager = new Manager(context);
+// 发送弹幕
+manager.add('this is a message');
+// 清除所有弹幕
+manager.cleanAll();
+```
